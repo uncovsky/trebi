@@ -9,6 +9,8 @@ up:
 	    -v $(PWD):/workspace \
 	    trebi tail -f /dev/null
 	docker exec -it trebi bash
+attach:
+	docker exec -it trebi bash
 down:
 	docker stop trebi
 	docker rm trebi
