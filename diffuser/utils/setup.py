@@ -41,6 +41,7 @@ def lazy_fstring(template, args):
 
 class Parser(Tap):
 
+    # Typed Argument Parser (tap)
     def save(self):
         fullpath = os.path.join(self.savepath, 'args.json')
         print(f'[ utils/setup ] Saved args to {fullpath}')

@@ -66,14 +66,15 @@ RUN pip install \
     crcmod \
     google-api-python-client \
     cryptography \
-    gdown>=4.6.0 \ 
-    bullet_safety_gym
+    gdown>=4.6.0 
 
 RUN pip install \
     git+https://github.com/Farama-Foundation/d4rl@f2a05c0d66722499bf8031b094d9af3aea7c372b#egg=d4rl \
-    git+https://github.com/JannerM/doodad.git@janner
+    git+https://github.com/JannerM/doodad.git@janner \
+    bullet_safety_gym
 
-
+RUN apt update
+RUN apt install -y vim
 
 COPY . /workspace/
 
