@@ -154,7 +154,7 @@ def get_dataset(env):
 
     return dataset
 
-def sequence_dataset(env, preprocess_fn):
+def sequence_dataset(env, preprocess_fn, dsrl_env=False):
     """
     Returns an iterator through trajectories.
     Args:
@@ -170,8 +170,12 @@ def sequence_dataset(env, preprocess_fn):
             terminals
     """
 
-    dataset = get_dataset(env)
-    dataset = preprocess_fn(dataset)
+    if dsrl_env:
+        dataset = get_dsrl_dataset(env)
+        # Omitting preprocessing, since it's turned off for everything anyway.
+    else:
+        dataset = get_dataset(env)
+        dataset = preprocess_fn(dataset)
 
     N = dataset['rewards'].shape[0]
     data_ = collections.defaultdict(list)
@@ -197,7 +201,7 @@ def sequence_dataset(env, preprocess_fn):
             episode_data = {}
             for k in data_:
                 episode_data[k] = np.array(data_[k])
-            if 'maze2d' in env.name:
+            if not dsrl_env and 'maze2d' in env.name:
                 episode_data = process_maze2d_episode(episode_data)
             yield episode_data
             data_ = collections.defaultdict(list)

@@ -4,7 +4,7 @@ import torch
 import pdb
 
 from .preprocessing import get_preprocess_fn
-from .d4rl import load_environment, sequence_dataset
+from .d4rl import load_environment, sequence_dataset, get_dsrl_dataset
 from .normalization import DatasetNormalizer
 from .buffer import ReplayBuffer
 
@@ -15,22 +15,26 @@ ValueBatch = namedtuple('ValueBatch', 'trajectories conditions values')
 
 class SequenceDataset(torch.utils.data.Dataset):
 
-    def __init__(self, env='hopper-medium-replay', horizon=64,
+    def __init__(self, env='hopper-medium-replay', dsrl_env=False, horizon=64,
         normalizer='LimitsNormalizer', preprocess_fns=[], max_path_length=1000,
         max_n_episodes=10000, termination_penalty=0, use_padding=True, seed=None, predict_reward_done=False):
 
         if 'ocpm' in env: max_n_episodes = 800000  #dotls4444
 
         self.preprocess_fn = get_preprocess_fn(preprocess_fns, env)
-        self.env = env = load_environment(env)
-        self.env.seed(seed)
         self.horizon = horizon
         self.max_path_length = max_path_length
         self.use_padding = use_padding
         self.predict_reward_done = predict_reward_done
         self.termination_penalty = termination_penalty
-        itr = sequence_dataset(env, self.preprocess_fn)
 
+
+        if not dsrl_env:
+            self.env = env = load_environment(env)
+            self.env.seed(seed)
+
+        # If dsrl_env env is a string, otherwise it's a gym env 
+        itr = sequence_dataset(env, self.preprocess_fn, dsrl_env)
         fields = ReplayBuffer(max_n_episodes, max_path_length, termination_penalty)
         for i, episode in enumerate(itr):
             fields.add_path(episode)
