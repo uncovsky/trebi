@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # Important: set the dataset path before importing dsrl
-data_path = Path("/app/data")
+data_path = Path("/data")
 os.environ["DSRL_DATASET_DIR"] = str(data_path)
 
 import gymnasium as gym
