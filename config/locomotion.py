@@ -35,6 +35,7 @@ base = {
         ## dataset
         'loader': 'datasets.SequenceDataset',
         'normalizer': 'GaussianNormalizer',
+        "dsrl_dataset" : True,
         'preprocess_fns': [],
         'clip_denoised': False,
         'use_padding': True,
@@ -81,6 +82,7 @@ base = {
         'loader': 'datasets.ValueDataset',
         'normalizer': 'GaussianNormalizer',
         'preprocess_fns': [],
+        "dsrl_dataset" : True,
         'use_padding': True,
         'max_path_length': 1000,
 
@@ -125,6 +127,7 @@ base = {
         'normalizer': 'GaussianNormalizer',
         'preprocess_fns': [],
         'use_padding': True,
+        "dsrl_dataset" : True,
         'max_path_length': 1000,
 
         ## serialization
@@ -192,6 +195,7 @@ base = {
         'diffusion_epoch': 'latest',
         'value_epoch': 'latest',
         'cost_value_epoch': 'latest',
+
 
         'verbose': False,
         'suffix': '0',

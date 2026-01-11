@@ -6,13 +6,10 @@ import diffuser.utils as utils
 #-----------------------------------------------------------------------------#
 
 class Parser(utils.Parser):
-    dataset: str = 'hopper-medium-expert-v2'
+    dataset: str = "OfflineHopperVelocityGymnasium-v1"
     config: str = 'config.locomotion'
 
 args = Parser().parse_args('diffusion')
-
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '2'
 
 #-----------------------------------------------------------------------------#
 #---------------------------------- dataset ----------------------------------#
@@ -22,6 +19,7 @@ dataset_config = utils.Config(
     args.loader,
     savepath=(args.savepath, 'dataset_config.pkl'),
     env=args.dataset,
+    dsrl_env=args.dsrl_dataset,
     horizon=args.horizon,
     normalizer=args.normalizer,
     preprocess_fns=args.preprocess_fns,
@@ -34,10 +32,14 @@ render_config = utils.Config(
     args.renderer,
     savepath=(args.savepath, 'render_config.pkl'),
     env=args.dataset,
+    dsrl_env=args.dsrl_dataset
 )
 
 dataset = dataset_config()
 renderer = render_config()
+
+if args.dsrl_dataset:
+    renderer = None
 
 observation_dim = dataset.observation_dim
 action_dim = dataset.action_dim
@@ -49,6 +51,7 @@ transition_dim = observation_dim + action_dim + 2 * args.predict_reward_done
 
 
 if "decouple" in args.config:
+    # model env dynamics and policy separately
     dynamic_model_config = utils.Config(
         args.model,
         savepath=(args.savepath, 'dynamic_model_config.pkl'),

@@ -55,7 +55,12 @@ class MuJoCoRenderer:
         default mujoco renderer
     '''
 
-    def __init__(self, env):
+    def __init__(self, env, dsrl_env=False):
+
+        if dsrl_env:
+            print("Rendering not supported for DSRL environments")
+            return 
+
         if type(env) is str:
             env = env_map(env)
             self.env = gym.make(env)
