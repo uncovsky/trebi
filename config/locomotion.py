@@ -332,14 +332,16 @@ def make_step_config(steps, learning_steps):
             'max_path_length': steps,
             'renderer': None,
             'termination_penalty': 0,
-            'n_train_steps': learning_steps,
+            'n_train_steps': learning_steps // 2, 
+            "n_steps_per_epoch": 1000,
             'learning_rate': 1e-3,
         },
         'cost_values': {
             'max_path_length': steps,
             'renderer': None,
             'termination_penalty': 0,
-            'n_train_steps': learning_steps,
+            'n_train_steps': learning_steps // 2,
+            "n_steps_per_epoch": 1000,
             'learning_rate': 1e-3,
         },
         'plan': {
@@ -349,12 +351,13 @@ def make_step_config(steps, learning_steps):
         }
     }
 
-learning_steps = 200_000
+learning_steps = 100_000
+learning_steps_bullet = 200_000
 
 # Dynamically produce configs we need
-step_200_config  = make_step_config(200, learning_steps)
-step_300_config  = make_step_config(300, learning_steps)
-step_500_config  = make_step_config(500, learning_steps)
+step_200_config  = make_step_config(200, learning_steps_bullet)
+step_300_config  = make_step_config(300, learning_steps_bullet)
+step_500_config  = make_step_config(500, learning_steps_bullet)
 step_1000_config = make_step_config(1000, learning_steps)
 
 # 1000 step horizon 
