@@ -120,8 +120,9 @@ class ValueDataset(SequenceDataset):
         adds a value field to the datapoints for training the value function
     '''
 
-    def __init__(self, *args, cost_func=None, discount=0.99, normed=False, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, cost_func=None, dsrl_env=False, discount=0.99, normed=False, **kwargs):
+        super().__init__(*args, **kwargs, dsrl_env=dsrl_env)
+        print(args)
         self.discount = discount
         self.discounts = self.discount ** np.arange(self.max_path_length)[:,None]
         self.normed = False
