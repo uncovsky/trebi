@@ -121,7 +121,8 @@ class Trainer(object):
             if self.step % self.update_ema_every == 0:
                 self.step_ema()
 
-            if self.step % self.save_freq == 0:
+            if self.step + 1 == n_train_steps:
+                # save final checkpoint
                 label = self.step // self.label_freq * self.label_freq
                 self.save(label)
 
