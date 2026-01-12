@@ -316,3 +316,60 @@ halfcheetah_medium_replay_v2 = halfcheetah_medium_v2 = halfcheetah_medium_expert
         'dim_mults': (1, 4, 8),
     },
 }
+
+
+# ------------------------ DSRL overrides ------------------------#
+
+def make_step_config(steps, learning_steps):
+    return {
+        'diffusion': {
+            'max_path_length': steps,
+            'n_train_steps': learning_steps,
+            "n_steps_per_epoch": 1000,
+            'renderer': None,
+        },
+        'values': {
+            'max_path_length': steps,
+            'renderer': None,
+            'termination_penalty': 0,
+            'n_train_steps': learning_steps,
+            'learning_rate': 1e-3,
+        },
+        'cost_values': {
+            'max_path_length': steps,
+            'renderer': None,
+            'termination_penalty': 0,
+            'n_train_steps': learning_steps,
+            'learning_rate': 1e-3,
+        },
+        'plan': {
+            'max_episode_length': steps,
+            'discount': 1.0,
+            'test_cost_with_discount': False,
+        }
+    }
+
+learning_steps = 200_000
+
+# Dynamically produce configs we need
+step_200_config  = make_step_config(200, learning_steps)
+step_300_config  = make_step_config(300, learning_steps)
+step_500_config  = make_step_config(500, learning_steps)
+step_1000_config = make_step_config(1000, learning_steps)
+
+# 1000 step horizon 
+OfflineSwimmerVelocityGymnasium_v1 = step_1000_config
+OfflineHopperVelocityGymnasium_v1 = step_1000_config
+OfflineHalfCheetahVelocityGymnasium_v1 = step_1000_config
+OfflineCarButton1Gymnasium_v0 = step_1000_config
+OfflineCarButton2Gymnasium_v0 = step_1000_config
+OfflineCarPush1Gymnasium_v0 = step_1000_config
+OfflineCarPush2Gymnasium_v0 = step_1000_config
+OfflineCarGoal1Gymnasium_v0 = step_1000_config
+OfflineCarGoal2Gymnasium_v0 = step_1000_config
+
+# The rest use shorter horizons
+OfflineBallCircle_v0 = step_200_config
+OfflineCarCircle_v0 = step_300_config
+OfflineDroneCircle_v0 = step_300_config
+OfflineAntCircle_v0 = step_500_config
