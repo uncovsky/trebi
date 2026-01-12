@@ -12,8 +12,6 @@ class Parser(utils.Parser):
 
 args = Parser().parse_args('values')
 
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 
 #-----------------------------------------------------------------------------#
 #---------------------------------- dataset ----------------------------------#
@@ -25,6 +23,7 @@ dataset_config = utils.Config(
     env=args.dataset,
     horizon=args.horizon,
     normalizer=args.normalizer,
+    dsrl_env=args.dsrl_dataset,
     preprocess_fns=args.preprocess_fns,
     use_padding=args.use_padding,
     max_path_length=args.max_path_length,

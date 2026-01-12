@@ -7,13 +7,10 @@ from cost import action_cost, qvel_cost, vel_cost, healthy_cost
 #-----------------------------------------------------------------------------#
 
 class Parser(utils.Parser):
-    dataset: str = 'walker2d-medium-replay-v2'
+    dataset: str = 'OfflineHopperVelocityGymnasium-v1'
     config: str = 'config.locomotion'
 
 args = Parser().parse_args('cost_values')
-
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '3'
 
 #binarization_threshold
 # action = 1.5,    vel = 2.5
@@ -37,6 +34,7 @@ dataset_config = utils.Config(
     preprocess_fns=args.preprocess_fns,
     use_padding=args.use_padding,
     max_path_length=args.max_path_length,
+    dsrl_env=args.dsrl_dataset,
     ## value-specific kwargs
     discount=args.discount,
     termination_penalty=args.termination_penalty,
