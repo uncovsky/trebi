@@ -1,10 +1,13 @@
 import diffuser.utils as utils
+import wandb
 import pdb
 from cost import action_cost, qvel_cost, vel_cost, healthy_cost
 
 #-----------------------------------------------------------------------------#
 #----------------------------------- setup -----------------------------------#
 #-----------------------------------------------------------------------------#
+
+wandb.init(project='test_trebi', resume='allow')
 
 class Parser(utils.Parser):
     dataset: str = 'OfflineHopperVelocityGymnasium-v1'
@@ -368,3 +371,5 @@ for i in range(n_epochs):
     print(f'Epoch {i} / {n_epochs} | {args.savepath}')
     trainer.train(n_train_steps=args.n_steps_per_epoch)
 trainer.save(args.seed)
+
+wandb.finish()
