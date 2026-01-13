@@ -14,9 +14,7 @@ IMAGE_NAME="trebi"
 TAG="latest"
 APP_IMAGE="${DOCKER_USER}/${IMAGE_NAME}:${TAG}"
 
-# GPUs per machine (adjust as needed)
-GPUS=(0 1 2 3)
-
+# Check GHCR PAT argument
 if [ -z "$1" ]; then
   echo "Usage: $0 <GHCR_PAT>"
   exit 1
@@ -26,23 +24,24 @@ GHCR_PAT="$1"
 for HOST in "${MACHINES[@]}"; do
   echo "🚀 Deploying to $HOST"
 
-  ssh "$HOST" bash -c "'
-    set -e
+  ssh "$HOST" bash -s << EOF
+set -e
 
-    echo $GHCR_PAT | docker login ghcr.io -u uncovsky --password-stdin
+# Login to GHCR
+echo "$GHCR_PAT" | docker login ghcr.io -u uncovsky --password-stdin
 
-    cd ~/trebi
+cd ~/trebi
 
-    make pull
-    make down || true
-    make up &
+# Pull image and start container
+make pull
+make down || true
+make up &
 
-    sleep 5  # wait for container to start
+sleep 5  # wait for container to start
 
-    for GPU in ${GPUS[@]}; do
-      docker exec -d --env CUDA_VISIBLE_DEVICES=\$GPU trebi \
-        wandb agent $SWEEP_ID &
-    done
-    wait
-  '"
+# Start W&B agent inside container
+docker exec -d trebi wandb agent $SWEEP_ID
+
+EOF
+
 done
