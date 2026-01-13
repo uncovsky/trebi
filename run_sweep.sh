@@ -19,7 +19,9 @@ if [ -z "$1" ]; then
   echo "Usage: $0 <GHCR_PAT>"
   exit 1
 fi
+
 GHCR_PAT="$1"
+SWEEP_IP="$2"
 
 for HOST in "${MACHINES[@]}"; do
   echo "🚀 Deploying to $HOST"
@@ -27,20 +29,32 @@ for HOST in "${MACHINES[@]}"; do
   ssh "$HOST" bash -s << EOF
 set -e
 
+if [ ! -d /var/data/xuncovsk_trebi ]; then
+    mkdir /var/data/xuncovsk_trebi
+fi
+
+cd /var/data/xuncovsk_trebi
+
+if [ ! -d /var/data/xuncovsk_trebi/trebi ]; then
+  git clone git@github.com:uncovsky/trebi.git
+  cd trebi
+else
+  cd trebi
+  git pull
+fi
+
 # Login to GHCR
 echo "$GHCR_PAT" | docker login ghcr.io -u uncovsky --password-stdin
 
-cd ~/trebi
 
 # Pull image and start container
 make pull
 make down || true
-make up &
+make up
 
-sleep 5  # wait for container to start
-
-# Start W&B agent inside container
-docker exec -d trebi wandb agent $SWEEP_ID
+# Start two W&B agents inside container
+docker exec -d trebi wandb agent $SWEEP_ID &
+docker exec -d trebi wandb agent $SWEEP_ID &
 
 EOF
 
