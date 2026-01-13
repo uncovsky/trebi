@@ -20,7 +20,7 @@ push: build
 	docker push $(APP_IMAGE)
 
 pull:
-	docker pull $(APP_IMAGE):$(TAG)
+	docker pull $(APP_IMAGE)
 
 # ==== RUN ====
 up:
