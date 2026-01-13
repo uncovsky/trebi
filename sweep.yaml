@@ -1,0 +1,22 @@
+program: train_all.py      
+method: grid               
+project: test_trebi   
+
+parameters:
+  dataset:
+    values:
+      - OfflineSwimmerVelocityGymnasium-v1
+      - OfflineHopperVelocityGymnasium-v1
+      - OfflineHalfCheetahVelocityGymnasium-v1
+      - OfflineCarButton1Gymnasium-v0
+      - OfflineCarButton2Gymnasium-v0
+      - OfflineCarPush1Gymnasium-v0
+      - OfflineCarPush2Gymnasium-v0
+      - OfflineCarGoal1Gymnasium-v0
+      - OfflineCarGoal2Gymnasium-v0
+      - OfflineCarCircle-v0
+      - OfflineAntCircle-v0
+      - OfflineDroneCircle-v0
+      - OfflineBallCircle-v0
+  seed:
+    values: [0, 10, 20, 30, 40]
