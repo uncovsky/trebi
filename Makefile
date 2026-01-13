@@ -9,9 +9,11 @@ build:
 # Run main app container
 up: build
 	docker run -d \
-		--gpus "device=0" \
-		--name $(CONTAINER) \
-		$(APP_IMAGE) tail -f /dev/null
+	  --gpus "device=0" \
+	  --name $(CONTAINER) \
+	  -v "$(PWD)":/workspace \
+	  $(APP_IMAGE) tail -f /dev/null
+
 	docker exec -it $(CONTAINER) bash
 
 attach:
