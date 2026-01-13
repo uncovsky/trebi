@@ -30,8 +30,6 @@ up:
 	  -v "$(PWD)":/workspace \
 	  $(APP_IMAGE) tail -f /dev/null
 
-	docker exec -it $(CONTAINER) bash
-
 attach:
 	docker exec -it $(CONTAINER) bash
 
