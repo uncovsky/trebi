@@ -75,6 +75,7 @@ class Parser(Tap):
             print(f'[ utils/setup ] Using overrides | config: {args.config} | dataset: {dataset}')
             overrides = getattr(module, dataset)[experiment]
             params.update(overrides)
+            print(overrides)
         else:
             print(f'[ utils/setup ] Not using overrides | config: {args.config} | dataset: {dataset}')
 
@@ -86,35 +87,43 @@ class Parser(Tap):
         return args
 
     def add_extras(self, args):
-        '''
-            Override config parameters with command-line arguments
-        '''
-        extras = args.extra_args
-        if not len(extras):
-            return
-
-        print(f'[ utils/setup ] Found extras: {extras}')
-        assert len(extras) % 2 == 0, f'Found odd number ({len(extras)}) of extras: {extras}'
-        for i in range(0, len(extras), 2):
-            key = extras[i].replace('--', '')
-            val = extras[i+1]
-            assert hasattr(args, key), f'[ utils/setup ] {key} not found in config: {args.config}'
-            old_val = getattr(args, key)
-            old_type = type(old_val)
-            print(f'[ utils/setup ] Overriding config | {key} : {old_val} --> {val}')
-            if val == 'None':
-                val = None
-            elif val == 'latest':
-                val = 'latest'
-            elif old_type in [bool, type(None)]:
-                try:
-                    val = eval(val)
-                except:
-                    print(f'[ utils/setup ] Warning: could not parse {val} (old: {old_val}, {old_type}), using str')
-            else:
-                val = old_type(val)
-            setattr(args, key, val)
-            self._dict[key] = val
+         '''
+             Override config parameters with command-line arguments
+         '''
+         extras = args.extra_args
+         if not len(extras):
+             return
+ 
+         print(f'[ utils/setup ] Found extras: {extras}')
+         #assert len(extras) % 2 == 0, f'Found odd number ({len(extras)}) of extras: {extras}'
+         new_extras = []
+         if "=" in extras[0]:
+             for x in extras:
+                 key, val = x.split("=")
+                 new_extras.append(key)
+                 new_extras.append(val)
+         extras = new_extras
+ 
+         for i in range(0, len(extras), 2):
+             key = extras[i].replace('--', '')
+             val = extras[i+1]
+             assert hasattr(args, key), f'[ utils/setup ] {key} not found in config: {args.config}'
+             old_val = getattr(args, key)
+             old_type = type(old_val)
+             print(f'[ utils/setup ] Overriding config | {key} : {old_val} --> {val}')
+             if val == 'None':
+                 val = None
+             elif val == 'latest':
+                 val = 'latest'
+             elif old_type in [bool, type(None)]:
+                 try:
+                     val = eval(val)
+                 except:
+                     print(f'[ utils/setup ] Warning: could not parse {val} (old: {old_val}, {old_type}), using str')
+             else:
+                 val = old_type(val)
+             setattr(args, key, val)
+             self._dict[key] = val
 
     def eval_fstrings(self, args):
         for key, old in self._dict.items():
