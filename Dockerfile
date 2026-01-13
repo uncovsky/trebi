@@ -76,6 +76,9 @@ RUN pip install \
 RUN apt update
 RUN apt install -y vim
 
+RUN pip install dsrl
+RUN pip install 'gym<0.25.0'
+
 COPY . /workspace/
 
 CMD ["/bin/bash"]
