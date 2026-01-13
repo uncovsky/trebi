@@ -1,7 +1,11 @@
-program: train_all.py      
+command:    
+  - python3
+  - -m 
+  - scripts.train_all
+  - ${args}
+
 method: grid               
 project: test_trebi   
-
 parameters:
   dataset:
     values:
