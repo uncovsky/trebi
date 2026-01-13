@@ -161,14 +161,8 @@ class ValueDataset(SequenceDataset):
             # if np.all(obs == np.arange(24, 32)):
             #     print(value)
         else:
-            field = {k:v[path_ind] for k, v in self.fields.items()}
-            field['path_lengths'] = self.fields['path_lengths'][path_ind]
-            if 'costs' in self.fields._dict:
-                costs = self.fields['costs'][path_ind, start:]
-            else:
-                costs = self.cost_func(start, field)
-            if field['terminals'].any() and self.termination_penalty is not None:
-                costs[field['path_lengths'] - 1 - start] += self.termination_penalty
+            # dropped cost_func from here
+            costs = self.fields['costs'][path_ind, start:]
             discounts = self.discounts[:len(costs)]
             value = (discounts * costs).sum()
             #print(costs.shape, value, np.sum([x.any() for x in self.fields['terminals']]))

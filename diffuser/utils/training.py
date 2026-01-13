@@ -121,11 +121,6 @@ class Trainer(object):
             if self.step % self.update_ema_every == 0:
                 self.step_ema()
 
-            if self.step + 1 == n_train_steps:
-                # save final checkpoint
-                label = self.step // self.label_freq * self.label_freq
-                self.save(label)
-
             if self.step % self.log_freq == 0:
                 infos_str = ' | '.join([f'{key}: {val:8.4f}' for key, val in infos.items()])
                 print(f'{self.step}: {loss:8.4f} | {infos_str} | t: {timer():8.4f}', flush=True)

@@ -359,10 +359,11 @@ step_200_config  = make_step_config(200, learning_steps_bullet)
 step_300_config  = make_step_config(300, learning_steps_bullet)
 step_500_config  = make_step_config(500, learning_steps_bullet)
 step_1000_config = make_step_config(1000, learning_steps)
+test = make_step_config(1000, 2000)
 
 # 1000 step horizon 
 OfflineSwimmerVelocityGymnasium_v1 = step_1000_config
-OfflineHopperVelocityGymnasium_v1 = step_1000_config
+OfflineHopperVelocityGymnasium_v1 =step_1000_config
 OfflineHalfCheetahVelocityGymnasium_v1 = step_1000_config
 OfflineCarButton1Gymnasium_v0 = step_1000_config
 OfflineCarButton2Gymnasium_v0 = step_1000_config
