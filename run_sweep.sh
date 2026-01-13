@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+# test edit
 SWEEP_ID="test_trebi/full_sweep"
 MACHINES=(
   erinys03
