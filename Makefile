@@ -28,6 +28,7 @@ up:
 	  --gpus "device=0" \
 	  --name $(CONTAINER) \
 	  -v "$(PWD)":/workspace \
+	  -e WANDB_API_KEY=$$WANDB_API_KEY \
 	  $(APP_IMAGE) tail -f /dev/null
 
 attach:
