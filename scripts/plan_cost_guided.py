@@ -1,7 +1,12 @@
 import pdb
 
 import diffuser.sampling as sampling
+import torch
 import diffuser.utils as utils
+
+import gymnasium
+import dsrl
+
 from cost import *
 import wandb
 import numpy as np
@@ -25,6 +30,9 @@ class Parser(utils.Parser):
     random_budget: int = 0
 
 args = Parser().parse_args('plan')
+
+value_discount = 0.997
+
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
 print(args.dataset, args.ratio_of_maxthreshold)
@@ -40,13 +48,6 @@ if args.cost_threshold is None:
             args.cost_threshold = MAX_COST_THRESHOLD[args.dataset] * args.ratio_of_maxthreshold
 
 init_cost_threshold = args.cost_threshold # 1e6 #82.75 #1.5
-if not args.test_cost_with_discount and args.discount!=1.0:
-    if args.test_cost_with_fixed_length:
-        init_cost_threshold = init_cost_threshold * (1-args.discount**args.max_episode_length) \
-            / (1-args.discount) / args.max_episode_length
-    else:
-        init_cost_threshold = init_cost_threshold * THRESHOLD_RATIO[args.dataset] 
-args.init_cost_threshold = init_cost_threshold
 args.init_init_cost_threshold = init_cost_threshold
 args.init_cost_threshold = args.cost_threshold
 
@@ -55,7 +56,6 @@ def cost_func(*a, **kwargs):
     #kwargs['binarization_threshold'] = 2.5
     kwargs['env_name'] = args.dataset.split("-")[0]
     return vel_cost(*a, **kwargs)
-
 
 is_single_step_constraint = False
 single_check_threshold = 2.0
@@ -68,7 +68,8 @@ elif binarization_threshold:
     name = "bin_" + cost_func_name
 else:
     name = cost_func_name
-args.cost_value_loadpath = f'{name}_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{args.discount}'
+args.cost_value_loadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{value_discount}'
+args.value_loadpath = f'values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{value_discount}'
 
 #-----------------------------------------------------------------------------#
 #---------------------------------- loading ----------------------------------#
@@ -149,23 +150,8 @@ all_total_cost = []
 all_discount_total_cost = []
 
 for n_test_episode in range(args.n_test_episode):
-    
-    if args.random_budget:
-        args.ratio_of_maxthreshold = np.random.uniform(0.1, 1)
-        if args.test_cost_with_discount:
-            args.cost_threshold = MAX_COST_DISCOUNT_THRESHOLD[args.dataset] * args.ratio_of_maxthreshold
-        else:
-            args.cost_threshold = MAX_COST_THRESHOLD[args.dataset] * args.ratio_of_maxthreshold
 
-        init_cost_threshold = args.cost_threshold # 1e6 #82.75 #1.5
-        if not args.test_cost_with_discount and args.discount!=1.0:
-            if args.test_cost_with_fixed_length:
-                init_cost_threshold = init_cost_threshold * (1-args.discount**args.max_episode_length) \
-                    / (1-args.discount) / args.max_episode_length
-            else:
-                init_cost_threshold = init_cost_threshold * THRESHOLD_RATIO[args.dataset] 
-    
-    remain_cost = init_cost_threshold 
+    remain_cost = init_cost_threshold
     args.init_cost_threshold = init_cost_threshold
     args.n_test_episode = n_test_episode
     if args.use_wandb:
@@ -183,7 +169,7 @@ for n_test_episode in range(args.n_test_episode):
     discount_total_cost = 0
 
     env = dataset.env
-    observation = env.reset()
+    observation, _ = env.reset()
     if "v2" in args.dataset:
         cost = eval_cost_from_env(env, history)
 
@@ -193,6 +179,7 @@ for n_test_episode in range(args.n_test_episode):
     import time
     t_start = time.time()
     for t in range(args.max_episode_length):
+        print(remain_cost, observation)
 
         if t % 10 == 0: print(args.savepath, flush=True)
 
@@ -208,44 +195,41 @@ for n_test_episode in range(args.n_test_episode):
         if t % args.control_interval == 0:
             action, samples = policy(conditions, batch_size=args.batch_size, verbose=args.verbose,
                                     cost_threshold=cost_threshold, plan_horizon=max(args.horizon, args.control_interval),)
-            
+
         action = samples.actions[0, t%args.control_interval]
+        print("played action", action)
 
         if hasattr(args, 'get_budget_from_env') and args.get_budget_from_env:
             cost_threshold = 0
 
         ## execute action in environment
-        next_observation, reward, terminal, info = env.step(action)
-        if 'cost' in info:
-            cost = info['cost']
-        else:
-            cost = eval_cost_from_env(env, history)
+        next_observation, reward, trunc, terminated, info = env.step(action)
+        print(reward, trunc, terminated, info)
+        cost = info['cost']
 
         ## print reward and score
         n_single_step_break += (cost > single_check_threshold)
         total_reward += reward
-        discount_total_cost += cost * (args.discount ** t)
-        if args.test_cost_with_discount:
-            total_cost += cost * (args.discount ** t)
-        else:
-            total_cost += cost
+        total_cost += cost
         remain_cost = init_cost_threshold - discount_total_cost
 
-        score = env.get_normalized_score(total_reward) if hasattr(env, 'get_normalized_score') else 0
-        
+        env.set_target_cost(init_cost_threshold)
+        #score = env.get_normalized_score(total_reward, total_cost) if hasattr(env, 'get_normalized_score') else 0
+        score = 0
+
         if args.use_wandb:
-            wandb.log({"score": score, 'time_step':t}) 
+            wandb.log({"score": score, 'time_step':t})
             wandb.log({"return": total_reward, 'time_step':t})
-            wandb.log({"values": samples.values[0], 'time_step':t}) 
+            wandb.log({"values": samples.values[0], 'time_step':t})
             wandb.log({"normed_total_cost": total_cost/args.cost_threshold, 'time_step':t})
-            wandb.log({"total_cost": total_cost, 'time_step':t}) 
+            wandb.log({"total_cost": total_cost, 'time_step':t})
             wandb.log({"normed_discount_total_cost": discount_total_cost/init_cost_threshold, 'time_step':t})
-            wandb.log({"discount_total_cost": discount_total_cost, 'time_step':t}) 
-            wandb.log({"cost_threshold": cost_threshold, 'time_step':t}) 
-            wandb.log({"cost_values": samples.costs[0], 'time_step':t}) 
+            wandb.log({"discount_total_cost": discount_total_cost, 'time_step':t})
+            wandb.log({"cost_threshold": cost_threshold, 'time_step':t})
+            wandb.log({"cost_values": samples.costs[0], 'time_step':t})
 
         print(
-            f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminal} \n'
+            f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
             f'cost: {cost:.2f} | normed_total_cost : {total_cost/args.cost_threshold:.2f} | total_cost : {total_cost:.2f} | '
             f'normed_discount_total_cost : {discount_total_cost/init_cost_threshold:.2f} | discount_total_cost : {discount_total_cost:.2f} | '
             f'cost_threshold : {cost_threshold:.2f} | cost_values: {samples.costs[0]} | n_single_break: {n_single_step_break} | '
@@ -259,7 +243,7 @@ for n_test_episode in range(args.n_test_episode):
         ## render every `args.vis_freq` steps
         #logger.log(t, samples, state, rollout)
 
-        if terminal:
+        if trunc or terminated:
             break
 
         observation = next_observation
@@ -267,11 +251,16 @@ for n_test_episode in range(args.n_test_episode):
     ## write results to json file at `args.savepath`
     #logger.finish(t, score, total_reward, terminal, diffusion_experiment, value_experiment)
 
+    print9
+
     t_end = time.time()
     print("episode time is ", (t_end-t_start), (t_end-t_start)/(t+1))
+    print("Setting tgt to", init_cost_threshold)
+    env.set_target_cost(init_cost_threshold)
+    score = env.get_normalized_score(total_reward, total_cost)
 
-    print()
-    all_results.append(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminal} \n'
+    print(score)
+    all_results.append(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
             f'cost: {cost:.2f} | normed_total_cost : {total_cost/args.cost_threshold:.2f} | total_cost : {total_cost:.2f} | '
             f'normed_discount_total_cost : {discount_total_cost/init_cost_threshold:.2f} | discount_total_cost : {discount_total_cost:.2f} | '
             f'cost_threshold : {cost_threshold:.2f} | cost_values: {samples.costs[0]} | n_single_break: {n_single_step_break} | '
@@ -305,11 +294,11 @@ for n_test_episode in range(args.n_test_episode):
 
     if args.use_wandb:
         wandb.log({'final/score': score, 'n_test_episode': n_test_episode})
-        wandb.log({"final/normed_total_cost": total_cost/args.cost_threshold, 'n_test_episode': n_test_episode}) 
-        wandb.log({"final/total_cost": total_cost, 'n_test_episode': n_test_episode}) 
-        wandb.log({"final/normed_discount_total_cost": discount_total_cost/init_cost_threshold, 'n_test_episode': n_test_episode}) 
-        wandb.log({"final/discount_total_cost": discount_total_cost, 'n_test_episode': n_test_episode}) 
-        wandb.log({"final/episode_len": t+1, 'n_test_episode': n_test_episode}) 
+        wandb.log({"final/normed_total_cost": total_cost/args.cost_threshold, 'n_test_episode': n_test_episode})
+        wandb.log({"final/total_cost": total_cost, 'n_test_episode': n_test_episode})
+        wandb.log({"final/normed_discount_total_cost": discount_total_cost/init_cost_threshold, 'n_test_episode': n_test_episode})
+        wandb.log({"final/discount_total_cost": discount_total_cost, 'n_test_episode': n_test_episode})
+        wandb.log({"final/episode_len": t+1, 'n_test_episode': n_test_episode})
         wandb.log({"final/return": total_reward, 'n_test_episode': n_test_episode})
 
     if args.use_wandb:

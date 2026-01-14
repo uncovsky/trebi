@@ -2,6 +2,7 @@ from collections import namedtuple
 import numpy as np
 import torch
 import pdb
+import gymnasium as gymn
 
 from .preprocessing import get_preprocess_fn
 from .d4rl import load_environment, sequence_dataset, get_dsrl_dataset
@@ -32,8 +33,11 @@ class SequenceDataset(torch.utils.data.Dataset):
         if not dsrl_env:
             self.env = env = load_environment(env)
             self.env.seed(seed)
+        else:
+            self.env = gymn.make(env)
+            self.env.reset(seed=seed)
 
-        # If dsrl_env env is a string, otherwise it's a gym env 
+        # If dsrl_env env is a string, otherwise it's a gym env
         itr = sequence_dataset(env, self.preprocess_fn, dsrl_env)
         fields = ReplayBuffer(max_n_episodes, max_path_length, termination_penalty)
         for i, episode in enumerate(itr):
@@ -73,8 +77,8 @@ class SequenceDataset(torch.utils.data.Dataset):
             max_start = min(path_length - 1, self.max_path_length - horizon)
             if not self.use_padding:
                 max_start = min(max_start, path_length - horizon)
-            for start in range(max_start+1):   
-                end = start + horizon 
+            for start in range(max_start+1):
+                end = start + horizon
                 indices.append((i, start, end))
         indices = np.array(indices)
         return indices
@@ -96,7 +100,7 @@ class SequenceDataset(torch.utils.data.Dataset):
 
         conditions = self.get_conditions(observations)
         if self.predict_reward_done:
-            observations = np.concatenate([observations, 
+            observations = np.concatenate([observations,
                             self.fields.rewards[path_ind, start:end], self.fields.terminals[path_ind, start:end]], axis=-1)
         trajectories = np.concatenate([actions, observations], axis=-1)
         batch = Batch(trajectories, conditions)
