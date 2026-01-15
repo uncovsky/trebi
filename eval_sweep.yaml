@@ -6,13 +6,13 @@ command:
 method: grid               
 project: eval_trebi   
 parameters:
-  eval_dataset:
+  dataset:
     values:
       - OfflineCarCircle-v0
       - OfflineAntCircle-v0
       - OfflineDroneCircle-v0
       - OfflineBallCircle-v0
-  eval_seed:
+  checkpoint:
     values: [0, 10, 20, 30, 40]
-  eval_threshold:
+  cost_threshold:
     values: [10, 20, 40]
