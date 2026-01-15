@@ -332,7 +332,7 @@ def make_step_config(steps, learning_steps):
             'max_path_length': steps,
             'renderer': None,
             'termination_penalty': 0,
-            'n_train_steps': learning_steps // 2, 
+            'n_train_steps': learning_steps,
             "n_steps_per_epoch": 1000,
             'learning_rate': 1e-3,
         },
@@ -340,7 +340,7 @@ def make_step_config(steps, learning_steps):
             'max_path_length': steps,
             'renderer': None,
             'termination_penalty': 0,
-            'n_train_steps': learning_steps // 2,
+            'n_train_steps': learning_steps,
             "n_steps_per_epoch": 1000,
             'learning_rate': 1e-3,
         },
@@ -361,7 +361,7 @@ step_500_config  = make_step_config(500, learning_steps_bullet)
 step_1000_config = make_step_config(1000, learning_steps)
 test = make_step_config(1000, 2000)
 
-# 1000 step horizon 
+# 1000 step horizon
 OfflineSwimmerVelocityGymnasium_v1 = step_1000_config
 OfflineHopperVelocityGymnasium_v1 =step_1000_config
 OfflineHalfCheetahVelocityGymnasium_v1 = step_1000_config
