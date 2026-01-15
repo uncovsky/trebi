@@ -73,7 +73,7 @@ elif binarization_threshold:
     name = "bin_" + cost_func_name
 else:
     name = cost_func_name
-args.cost_value_loadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
+args.cost_value_Gloadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
 args.value_loadpath = f'values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
 
 #-----------------------------------------------------------------------------#
@@ -264,7 +264,7 @@ for n_test_episode in range(args.n_test_episode):
     normalized_cost += norm_cost
 
     if debug_prints:
-        all_results.append(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
+        all_results.ppend(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
                 f'cost: {cost:.2f} | normed_total_cost : {total_cost/args.cost_threshold:.2f} | total_cost : {total_cost:.2f} | '
                 f'normed_discount_total_cost : {discount_total_cost/init_cost_threshold:.2f} | discount_total_cost : {discount_total_cost:.2f} | '
                 f'cost_threshold : {cost_threshold:.2f} | cost_values: {samples.costs[0]} | n_single_break: {n_single_step_break} | '
@@ -287,7 +287,6 @@ for n_test_episode in range(args.n_test_episode):
         print("all total discount cost: ", all_discount_total_cost)
         print("all return:  ", all_return)
         print("all episode len:  ", all_episode_len)
-        import numpy as np
         print("mean scores:      ", np.mean(all_scores), np.std(all_scores))
         print("mean normed total cost:      ", np.mean(all_normed_total_cost), np.std(all_normed_total_cost))
         print("mean total cost:      ", np.mean(all_total_cost), np.std(all_total_cost))
@@ -316,3 +315,8 @@ mean_raw_rew = agg_total_rew / args.n_test_episode
 print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", mean_ret)
 print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", mean_cost)
 
+# save to ~/results
+save_dir = os.path.join(os.path.expanduser('~'), 'trebi_results/', args.dataset)
+with open(save_dir + "trebi.csv", "a+") as file:
+    file.write("seed,eval reward,normalized reward, target cost, eval cost, normalized cost\n")
+    file.write(f"{args.seed},{mean_raw_rew},{mean_ret},{init_cost_threshold},{mean_raw_cost},{mean_cost}\n")
