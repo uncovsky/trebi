@@ -155,14 +155,15 @@ all_results = []
 all_scores = []
 all_return = []
 all_episode_len = []
+
 all_total_cost = []
 all_discount_total_cost = []
 
 
-normalized_ret = 0
-normalized_cost = 0
-agg_total_cost = 0
-agg_total_rew = 0
+all_costs = []
+all_rews = []
+all_norm_costs = []
+all_norm_rews = []
 
 for n_test_episode in range(args.n_test_episode):
 
@@ -258,10 +259,10 @@ for n_test_episode in range(args.n_test_episode):
     env.set_target_cost(init_cost_threshold)
     norm_ret, norm_cost = env.get_normalized_score(total_reward, total_cost)
 
-    normalized_ret += norm_ret
-    agg_total_cost += total_cost
-    agg_total_rew += total_reward
-    normalized_cost += norm_cost
+    all_costs.append(total_cost)
+    all_rews.append(total_reward)
+    all_norm_costs.append(norm_cost)
+    all_norm_rews.append(norm_ret)
 
     if debug_prints:
         all_results.ppend(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
@@ -307,16 +308,13 @@ for n_test_episode in range(args.n_test_episode):
         if args.use_wandb:
             wandb.finish()
 
-mean_ret = normalized_ret / args.n_test_episode
-mean_cost = normalized_cost / args.n_test_episode
-mean_raw_cost = agg_total_cost / args.n_test_episode
-mean_raw_rew = agg_total_rew / args.n_test_episode
 
-print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", mean_ret)
-print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", mean_cost)
+print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", all_norm_rews.mean(), "+-", np.std(all_norm_rews))
+print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", all_norm_costs.mean(), "+-", np.std(all_norm_costs))
 
 # save to ~/results
 save_dir = os.path.join(os.path.expanduser('~'), 'trebi_results/', args.dataset)
 with open(save_dir + "trebi.csv", "a+") as file:
-    file.write("seed,eval reward,normalized reward, target cost, eval cost, normalized cost\n")
-    file.write(f"{args.seed},{mean_raw_rew},{mean_ret},{init_cost_threshold},{mean_raw_cost},{mean_cost}\n")
+    for i in range(len(all_norm_rews)):
+        file.write(f"{args.seed},{init_cost_threshold},{all_rews[i]},{all_costs[i]},{all_norm_rews[i]},{all_norm_costs[i]}\n")
+
