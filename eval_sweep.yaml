@@ -1,0 +1,18 @@
+command:    
+  - python3
+  - -m 
+  - scripts.plan_cost_guided
+  - ${args}
+method: grid               
+project: eval_trebi   
+parameters:
+  dataset:
+    values:
+      - OfflineCarCircle-v0
+      - OfflineAntCircle-v0
+      - OfflineDroneCircle-v0
+      - OfflineBallCircle-v0
+  seed:
+    values: [0, 10, 20, 30, 40]
+  threshold:
+    values: [10, 20, 40]
