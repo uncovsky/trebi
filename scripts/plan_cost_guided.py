@@ -41,7 +41,12 @@ def train(eval_dataset, eval_seed, eval_threshold):
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
 
-    print(args.dataset, args.ratio_of_maxthreshold)
+    args.dataset = eval_dataset
+    args.seed = eval_seed
+    args.init_cost_threshold = eval_threshold
+
+    print("Evaluating on dataset:", args.dataset, "with seed:", args.seed, "and cost threshold:", args.init_cost_threshold)
+
     if args.random_budget:
         args.ratio_of_maxthreshold = 1.0
     if args.cost_threshold is None:
@@ -85,15 +90,15 @@ def train(eval_dataset, eval_seed, eval_threshold):
     load_diffusion_func = utils.load_diffusion if not "decouple" in args.config else utils.load_decouple_diffusion
     diffusion_experiment = load_diffusion_func(
         args.loadbase, args.dataset, args.diffusion_loadpath,
-        epoch=args.diffusion_epoch, seed=args.seed,
+        epoch=eval_seed, seed=args.seed,
     )
     value_experiment = load_diffusion_func(
         args.loadbase, args.dataset, args.value_loadpath,
-        epoch=args.value_epoch, seed=args.seed,
+        epoch=eval_seed, seed=args.seed,
     )
     cost_value_experiment = load_diffusion_func(
         args.loadbase, args.dataset, args.cost_value_loadpath,
-        epoch=args.cost_value_epoch, seed=args.seed,
+        epoch=eval_seed, seed=args.seed,
     )
 
     ## ensure that the diffusion model and value function are compatible with each other
