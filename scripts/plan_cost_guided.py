@@ -32,7 +32,7 @@ class Parser(utils.Parser):
 
 args = Parser().parse_args('plan')
 
-debug_prints = False
+debug_prints = True
 
 discount = 0.997
 
@@ -71,8 +71,8 @@ elif binarization_threshold:
     name = "bin_" + cost_func_name
 else:
     name = cost_func_name
-args.cost_value_loadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{value_discount}'
-args.value_loadpath = f'values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{value_discount}'
+args.cost_value_loadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
+args.value_loadpath = f'values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
 
 #-----------------------------------------------------------------------------#
 #---------------------------------- loading ----------------------------------#
@@ -173,6 +173,7 @@ for n_test_episode in range(args.n_test_episode):
     n_single_step_break = 0
     total_reward = 0
     total_cost = 0
+    score = 0
     discount_total_cost = 0
 
     env = dataset.env
