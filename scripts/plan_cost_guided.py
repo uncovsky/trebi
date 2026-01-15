@@ -160,13 +160,14 @@ all_discount_total_cost = []
 
 
 normalized_ret = 0
-normalized_cost = 0 
+normalized_cost = 0
+agg_total_cost = 0
+agg_total_rew = 0
 
 for n_test_episode in range(args.n_test_episode):
 
     remain_cost = init_cost_threshold
     args.init_cost_threshold = init_cost_threshold
-    args.n_test_episode = n_test_episode
     if args.use_wandb:
         wandb.init(
             project=args.project,
@@ -218,7 +219,7 @@ for n_test_episode in range(args.n_test_episode):
 
         total_reward += reward
         total_cost += cost
-            
+
         # Total discounted cost accumulated so far
         discount_total_cost += cost * (args.discount ** t)
         remain_cost = init_cost_threshold - discount_total_cost
@@ -258,6 +259,8 @@ for n_test_episode in range(args.n_test_episode):
     norm_ret, norm_cost = env.get_normalized_score(total_reward, total_cost)
 
     normalized_ret += norm_ret
+    agg_total_cost += total_cost
+    agg_total_rew += total_reward
     normalized_cost += norm_cost
 
     if debug_prints:
@@ -299,7 +302,7 @@ for n_test_episode in range(args.n_test_episode):
             wandb.log({"final/total_cost": total_cost, 'n_test_episode': n_test_episode})
             wandb.log({"final/normed_discount_total_cost": discount_total_cost/init_cost_threshold, 'n_test_episode': n_test_episode})
             wandb.log({"final/discount_total_cost": discount_total_cost, 'n_test_episode': n_test_episode})
-            wandb.lo({"final/episode_len": t+1, 'n_test_episode': n_test_episode})
+            wandb.log({"final/episode_len": t+1, 'n_test_episode': n_test_episode})
             wandb.log({"final/return": total_reward, 'n_test_episode': n_test_episode})
 
         if args.use_wandb:
@@ -307,5 +310,9 @@ for n_test_episode in range(args.n_test_episode):
 
 mean_ret = normalized_ret / args.n_test_episode
 mean_cost = normalized_cost / args.n_test_episode
+mean_raw_cost = agg_total_cost / args.n_test_episode
+mean_raw_rew = agg_total_rew / args.n_test_episode
+
 print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", mean_ret)
 print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", mean_cost)
+
