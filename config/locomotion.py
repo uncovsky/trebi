@@ -351,8 +351,8 @@ def make_step_config(steps, learning_steps):
         }
     }
 
-learning_steps = 100_000
-learning_steps_bullet = 200_000
+learning_steps = 200_000
+learning_steps_bullet = 100_000
 
 # Dynamically produce configs we need
 step_200_config  = make_step_config(200, learning_steps_bullet)
