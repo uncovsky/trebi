@@ -312,8 +312,8 @@ for n_test_episode in range(args.n_test_episode):
 print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", all_norm_rews.mean(), "+-", np.std(all_norm_rews))
 print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", all_norm_costs.mean(), "+-", np.std(all_norm_costs))
 
-# save to ~/results
-save_dir = os.path.join(os.path.expanduser('~'), 'trebi_results/', args.dataset)
+# Save to results/dataset/
+save_dir = os.path.join("results/'", args.dataset)
 with open(save_dir + "trebi.csv", "a+") as file:
     for i in range(len(all_norm_rews)):
         file.write(f"{args.seed},{init_cost_threshold},{all_rews[i]},{all_costs[i]},{all_norm_rews[i]},{all_norm_costs[i]}\n")
