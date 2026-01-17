@@ -318,7 +318,7 @@ for threshold in range(min_threshold, max_threshold+1):
     print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", all_norm_costs.mean(), "+-", np.std(all_norm_costs))
 
     # Save to results/dataset/
-    save_dir = os.path.join("results/'", args.dataset)
+    save_dir = os.path.join("/results/'", args.dataset)
     with open(save_dir + "trebi.csv", "a+") as file:
         for i in range(len(all_norm_rews)):
             file.write(f"{args.seed},{init_cost_threshold},{all_rews[i]},{all_costs[i]},{all_norm_rews[i]},{all_norm_costs[i]}\n")
