@@ -322,6 +322,5 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
     # Save to results/dataset/
     save_dir = os.path.join("results/", args.dataset)
     with open(save_dir + "/trebi.csv", "a+") as file:
-        for i in range(len(all_norm_rews)):
-            file.write(f"{args.checkpoint},{init_cost_threshold},{all_rews[i]},{all_costs[i]},{all_norm_rews[i]},{all_norm_costs[i]}\n")
+        file.write(f"{args.checkpoint},{init_cost_threshold},{all_rews[-1]},{all_costs[-1]},{all_norm_rews[-1]},{all_norm_costs[-1]}\n")
 
