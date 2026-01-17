@@ -37,7 +37,7 @@ class Parser(utils.Parser):
 
 args = Parser().parse_args('plan')
 
-debug_prints = True
+debug_prints = False
 
 discount = 0.997
 
@@ -272,7 +272,7 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
         all_norm_rews.append(norm_ret)
 
         if debug_prints:
-            all_results.ppend(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
+            all_results.append(f't: {t} | r: {reward:.2f} |  R: {total_reward:.2f} | score: {score:.4f} | values: {samples.values[0]} | scale: {args.scale} | terminal: {terminated} \n'
                     f'cost: {cost:.2f} | normed_total_cost : {total_cost/args.cost_threshold:.2f} | total_cost : {total_cost:.2f} | '
                     f'normed_discount_total_cost : {discount_total_cost/init_cost_threshold:.2f} | discount_total_cost : {discount_total_cost:.2f} | '
                     f'cost_threshold : {cost_threshold:.2f} | cost_values: {samples.costs[0]} | n_single_break: {n_single_step_break} | '
