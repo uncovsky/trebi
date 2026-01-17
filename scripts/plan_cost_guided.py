@@ -166,8 +166,9 @@ all_costs = []
 all_rews = []
 all_norm_costs = []
 all_norm_rews = []
+threshold_discount = 1.0
 
-for threshold in range(min_threshold, max_threshold+1):
+for threshold in range(args.min_threshold, args.max_threshold+1):
         
     init_cost_threshold = threshold
 
@@ -201,7 +202,8 @@ for threshold in range(min_threshold, max_threshold+1):
 
             # Remaining discounted -> divide by gamma^t since critic outputs from
             # t'=0 and not from current t (need to adjust for discounting)
-            cost_threshold = remain_cost / (args.discount**(t))
+            # In trebi repo, they always set this discount to 1 though.
+            cost_threshold = remain_cost * (threshold_discount**(t))
             conditions = {0: observation}
 
             if t % args.control_interval == 0:
@@ -227,7 +229,7 @@ for threshold in range(min_threshold, max_threshold+1):
             total_cost += cost
 
             # Total discounted cost accumulated so far
-            discount_total_cost += cost * (args.discount ** t)
+            discount_total_cost += cost * (threshold_discount ** t)
             remain_cost = init_cost_threshold - discount_total_cost
 
             if args.use_wandb:
