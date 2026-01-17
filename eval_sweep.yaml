@@ -14,5 +14,3 @@ parameters:
       - OfflineBallCircle-v0
   checkpoint:
     values: [0, 10, 20, 30, 40]
-  cost_threshold:
-    values: [10, 20, 40]
