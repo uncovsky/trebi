@@ -77,7 +77,7 @@ elif binarization_threshold:
     name = "bin_" + cost_func_name
 else:
     name = cost_func_name
-args.cost_value_Gloadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
+args.cost_value_loadpath = f'vel_cost_values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
 args.value_loadpath = f'values/defaults_H{args.horizon}_T{args.n_diffusion_steps}_d{discount}'
 
 #-----------------------------------------------------------------------------#
