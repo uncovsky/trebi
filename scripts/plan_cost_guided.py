@@ -39,12 +39,11 @@ args = Parser().parse_args('plan')
 
 wandb.init(project=args.project)
 
-save_dir = os.path.join("results/", args.dataset)
+save_dir = os.path.join("csv/", args.dataset)
 os.makedirs(save_dir, exist_ok=True)
 
-with open(save_dir + "/trebi.csv", "w") as file:
+with open(save_dir + "/trebi.csv", "w+") as file:
     pass
-
 
 debug_prints = False
 
@@ -328,9 +327,6 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
     print(f"Mean Normalized Return over {args.n_test_episode} episodes: ", np.mean(all_norm_rews), "+-", np.std(all_norm_rews))
     print(f"Mean Normalized Cost over {args.n_test_episode} episodes: ", np.mean(all_norm_costs), "+-", np.std(all_norm_costs))
 
-    # Save to results/dataset/
-    save_dir = os.path.join("results/", args.dataset)
-
     wandb.log(
         {
             "return": all_rews[-1],
@@ -339,7 +335,6 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
         step=init_cost_threshold
     )
 
-    os.makedirs(save_dir, exist_ok=True)
     with open(save_dir + "/trebi.csv", "a+") as file:
         file.write(f"{args.checkpoint},{init_cost_threshold},{all_rews[-1]},{all_costs[-1]},{all_norm_rews[-1]},{all_norm_costs[-1]}\n")
 
