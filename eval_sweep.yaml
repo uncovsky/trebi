@@ -8,6 +8,9 @@ project: eval_trebi
 parameters:
   dataset:
     values:
+      - OfflineSwimmerVelocityGymnasium-v1
+      - OfflineHopperVelocityGymnasium-v1
+      - OfflineHalfCheetahVelocityGymnasium-v1
       - OfflineCarCircle-v0
       - OfflineAntCircle-v0
       - OfflineDroneCircle-v0
