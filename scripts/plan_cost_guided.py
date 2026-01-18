@@ -39,6 +39,13 @@ args = Parser().parse_args('plan')
 
 wandb.init(project=args.project)
 
+save_dir = os.path.join("results/", args.dataset)
+os.makedirs(save_dir, exist_ok=True)
+
+with open(save_dir + "/trebi.csv", "w") as file:
+    pass
+
+
 debug_prints = False
 
 discount = 0.997
