@@ -37,6 +37,8 @@ class Parser(utils.Parser):
 
 args = Parser().parse_args('plan')
 
+wandb.init(project=args.project)
+
 debug_prints = False
 
 discount = 0.997
@@ -321,6 +323,16 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
 
     # Save to results/dataset/
     save_dir = os.path.join("results/", args.dataset)
+
+    wandb.log(
+        {
+            "return": all_rews[-1],
+            "cost": all_costs[-1],
+        },
+        step=init_cost_threshold
+    )
+
     with open(save_dir + "/trebi.csv", "a+") as file:
         file.write(f"{args.checkpoint},{init_cost_threshold},{all_rews[-1]},{all_costs[-1]},{all_norm_rews[-1]},{all_norm_costs[-1]}\n")
+
 
