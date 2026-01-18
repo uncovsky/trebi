@@ -332,6 +332,7 @@ for threshold in range(args.min_threshold, args.max_threshold+1):
         step=init_cost_threshold
     )
 
+    os.makedirs(save_dir, exist_ok=True)
     with open(save_dir + "/trebi.csv", "a+") as file:
         file.write(f"{args.checkpoint},{init_cost_threshold},{all_rews[-1]},{all_costs[-1]},{all_norm_rews[-1]},{all_norm_costs[-1]}\n")
 
