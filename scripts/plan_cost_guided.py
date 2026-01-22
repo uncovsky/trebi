@@ -28,6 +28,7 @@ class Parser(utils.Parser):
     ratio_of_maxthreshold: float = None
     min_threshold: int = 10
     max_threshold: int = 50
+    thresh_step : int = 5
     n_test_episode: int = 1
     use_wandb: int = False
     checkpoint = 0
@@ -176,7 +177,7 @@ all_norm_costs = []
 all_norm_rews = []
 threshold_discount = 1.0
 
-for threshold in range(args.min_threshold, args.max_threshold+1):
+for threshold in np.arange(args.min_threshold, args.max_threshold + 1, args.thresh_step):
 
     init_cost_threshold = threshold
 
