@@ -177,8 +177,18 @@ all_norm_costs = []
 all_norm_rews = []
 threshold_discount = 1.0
 
-for threshold in np.arange(args.min_threshold, args.max_threshold + 1, args.thresh_step):
+# Threshold setup:
 
+if "Velocity" in args.dataset:
+    thresholds = [20, 40, 80]
+
+elif "Circle" in args.dataset:
+    thresholds = [10, 20, 40]
+else:
+    print("Using default thresholds [40, 80, 120]")
+    thresholds = [40, 80, 120]
+
+for threshold in thresholds:
     init_cost_threshold = threshold
 
     for n_test_episode in range(args.n_test_episode):
