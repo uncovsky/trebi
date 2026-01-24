@@ -340,8 +340,8 @@ for threshold in thresholds:
 
     wandb.log(
         {
-            "return": all_rews[-1],
-            "cost": all_costs[-1],
+            "return": all_rews.mean(),
+            "cost": all_costs.mean(),
         },
         step=init_cost_threshold
     )
